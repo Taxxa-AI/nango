@@ -1,0 +1,74 @@
+---
+title: Netvisor - How do I link my account?
+sidebarTitle: Netvisor
+---
+
+# Overview
+
+To authenticate with Netvisor you need five values:
+
+1. **Partner ID** and **Partner key** — issued by Netvisor support to the software partner publishing the integration. They are the same for every end-user of your integration.
+2. **Customer ID** and **Customer key** — per-user API identifiers that each end-user creates inside their own Netvisor account.
+3. **Organisation ID** — the Finnish business ID (y-tunnus) of the company the integration will operate on.
+
+Nango signs every outbound request with these values using the HMACSHA256 scheme from [Netvisor's API authentication docs](https://support.netvisor.fi/en/support/solutions/articles/77000557880-api-authentication). You do not compute signatures yourself.
+
+This guide walks you through generating an API identifier within Netvisor.
+
+### Prerequisites
+
+- A software partner agreement with Netvisor. Support emails the **Partner ID** and **Partner key** when your integration is registered.
+- The end-user needs a Netvisor account with **Company** admin rights.
+- Sandbox vs production is decided by the credentials, not a separate setting: generate API identifiers in your training company (`koulutus.netvisor.fi`) to test, or in the real company for production. Both use the same `isvapi.netvisor.fi` API endpoint.
+
+### Instructions
+
+<a id="step-1-obtain-partner-credentials-from-netvisor"></a>
+#### Step 1: Obtain partner credentials from Netvisor
+
+If you do not yet have a **Partner ID** and **Partner key**, contact Netvisor support to register your integration. The values are delivered by email. Store them as part of your Nango integration configuration — every connection your customers create uses the same partner pair.
+
+<a id="step-2-generate-an-api-identifier-in-netvisor"></a>
+#### Step 2: Generate an API identifier in Netvisor
+
+Each end-user performs this step inside their own Netvisor account.
+
+1. Log in to Netvisor (production: `https://netvisor.fi`, training/sandbox: `https://koulutus.netvisor.fi`).
+2. In the top bar, hover over the company name and scroll down to **API → API identifiers**.
+
+<img src="/api-integrations/netvisor/api-identifiers-menu.png" style={{maxWidth: "450px"}} />
+
+3. Click **Create new API identifier**. A new row appears with two fields:
+    - **User ID** — this is your **Customer ID**.
+    - **Key** — this is your **Customer key**. Treat it as a secret.
+
+<img src="/api-integrations/netvisor/api-identifiers-list.png" style={{maxWidth: "750px"}} />
+
+4. Copy both values somewhere safe.
+
+<a id="step-3-find-your-organisation-id"></a>
+#### Step 3: Find your Organisation ID
+
+The **Organisation ID** is the Finnish business identifier (y-tunnus) of the company you want to connect, formatted as `1234567-8`. Find it on the Netvisor company settings page or in any Finnish business registry (PRH). Sandbox accounts have a pre-assigned y-tunnus.
+
+<a id="step-4-enable-resource-access-rights"></a>
+#### Step 4: Enable resource access rights
+
+A fresh API identifier may not have access to every endpoint. The connection's verification step calls `accountingperiodlist.nv`, which lives under **Financial administration → Bookkeeping material**.
+
+1. From the company menu, go to **API → API resource access rights**.
+2. Select **General access rights** in the left panel.
+3. Scroll to the resources you plan to call and set each to **Allowed**.
+
+<img src="/api-integrations/netvisor/api-resource-rights.png" style={{maxWidth: "750px"}} />
+
+If a request returns `INSUFFICIENT_PERMISSIONS`, the matching toggle on this screen is the cause.
+
+<a id="step-5-submit-the-connect-form"></a>
+#### Step 5: Submit the connect form
+
+Enter your **Partner ID**, **Partner key**, **Customer ID**, **Customer key** and **Organisation ID**, pick a free-form **Integration name** and an **Interface language** (`FI`, `SE` or `EN`), then submit. Nango verifies the credentials by calling `accountingperiodlist.nv` and reports success or the exact error Netvisor returned.
+
+<img src="/api-integrations/netvisor/connect-form.png" style={{maxWidth: "450px"}} />
+
+You are now connected to Netvisor.

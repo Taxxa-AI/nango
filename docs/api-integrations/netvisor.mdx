@@ -1,0 +1,83 @@
+---
+title: Netvisor
+sidebarTitle: Netvisor
+description: 'Integrate your application with the Netvisor API'
+---
+
+## 🚀 Quickstart
+
+Connect to Netvisor with Nango and see data flow in 2 minutes. Netvisor is not OAuth: you supply five API credentials, and Nango signs every request with the HMACSHA256 scheme Netvisor requires.
+
+<Steps>
+    <Step title="Create the integration">
+    In Nango ([free signup](https://app.nango.dev)), go to [Integrations](https://app.nango.dev/dev/integrations) -> _Configure New Integration_ -> _Netvisor_.
+    </Step>
+    <Step title="Connect your Netvisor account">
+    Go to [Connections](https://app.nango.dev/dev/connections) -> _Add Test Connection_. Enter your Partner ID, Partner key, Customer ID, Customer key and Organisation ID, then save. See the [connect guide](/api-integrations/netvisor/connect) for how to obtain each value.
+    </Step>
+    <Step title="Call the Netvisor API">
+    Make your first request (returns the list of fiscal periods). Replace the placeholders with your [secret key](https://app.nango.dev/dev/environment-settings), [integration ID](https://app.nango.dev/dev/integrations), and [connection ID](https://app.nango.dev/dev/connections):
+    <Tabs>
+        <Tab title="cURL">
+
+            ```bash
+            curl "https://api.nango.dev/proxy/accountingperiodlist.nv" \
+              -H "Authorization: Bearer <NANGO-SECRET-KEY>" \
+              -H "Provider-Config-Key: <INTEGRATION-ID>" \
+              -H "Connection-Id: <CONNECTION-ID>"
+            ```
+
+        </Tab>
+
+        <Tab title="Node">
+
+        Install Nango's backend SDK with `npm i @nangohq/node`. Then run:
+
+        ```typescript
+        import { Nango } from '@nangohq/node';
+
+        const nango = new Nango({ secretKey: '<NANGO-SECRET-KEY>' });
+
+        const res = await nango.get({
+            endpoint: '/accountingperiodlist.nv',
+            providerConfigKey: '<INTEGRATION-ID>',
+            connectionId: '<CONNECTION-ID>'
+        });
+
+        console.log(res.data);
+        ```
+        </Tab>
+
+    </Tabs>
+    Or fetch credentials with the [Node SDK](/reference/sdks/node#get-a-connection-with-credentials) or [API](/reference/api/connection/get).
+
+    ✅ You're connected! Check the [Logs](https://app.nango.dev/dev/logs) tab in Nango to inspect requests.
+    </Step>
+
+    <Step title="Implement Nango in your app">
+        Follow our [Auth implementation guide](/guides/auth/auth-guide) to integrate Nango in your app.
+
+        To set up your own credentials, follow the connect guide linked below.
+    </Step>
+</Steps>
+
+## 📚 Netvisor integration guides
+
+Nango maintained guides for common use cases.
+
+- [How to connect your Netvisor account](/api-integrations/netvisor/connect)  
+Generate an API identifier in Netvisor and connect it to Nango
+
+Official docs: [Netvisor REST API authentication](https://support.netvisor.fi/en/support/solutions/articles/77000557880-api-authentication)
+
+## 🧩 Pre-built syncs & actions for Netvisor
+
+Enable them in your dashboard. Extend and customize to fit your needs.
+
+import PreBuiltUseCases from "/snippets/generated/netvisor/PreBuiltUseCases.mdx"
+
+<PreBuiltUseCases />
+
+<Info>
+    Questions? Join us in the [Slack community](https://nango.dev/slack).
+</Info>

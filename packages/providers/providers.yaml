@@ -13714,6 +13714,93 @@ next-cloud-ocs:
             prefix: https://
             doc_section: '#step-1-locate-your-next-cloud-domain'
 
+netvisor:
+    display_name: Netvisor
+    categories:
+        - accounting
+        - erp
+        - invoicing
+        - payment
+    auth_mode: API_KEY
+    proxy:
+        base_url: https://isvapi.netvisor.fi
+        headers:
+            x-netvisor-authentication-sender: ${connectionConfig.sender}
+            x-netvisor-authentication-partnerid: ${connectionConfig.partnerId}
+            x-netvisor-authentication-customerid: ${connectionConfig.customerId}
+            x-netvisor-authentication-timestamp: '${now:YYYY-MM-DD HH:mm:ss.SSS}'
+            x-netvisor-authentication-timestampunix: '${now:X}'
+            x-netvisor-authentication-transactionid: ${random}
+            x-netvisor-interface-language: ${connectionConfig.language}
+            x-netvisor-organisation-id: ${connectionConfig.organisationId}
+            x-netvisor-authentication-machashcalculationalgorithm: HMACSHA256
+            x-netvisor-authentication-usehttpresponsestatuscodes: '1'
+            x-netvisor-authentication-mac: '${hmacSha256Hex(https://${host}${pathWithQuery}&${connectionConfig.sender}&${connectionConfig.customerId}&${now:YYYY-MM-DD HH:mm:ss.SSS}&${connectionConfig.language}&${connectionConfig.organisationId}&${random}&${now:X}&${apiKey}&${connectionConfig.partnerKey}, ${apiKey}&${connectionConfig.partnerKey})}'
+        verification:
+            method: GET
+            endpoints:
+                - /accountingperiodlist.nv
+    docs: https://nango.dev/docs/api-integrations/netvisor
+    docs_connect: https://nango.dev/docs/api-integrations/netvisor/connect
+    connection_config:
+        sender:
+            type: string
+            title: Integration name
+            description: Free-form identifier for your integration.
+            example: MyApp
+            pattern: '^[A-Za-z0-9_-]+$'
+            order: 1
+        partnerId:
+            type: string
+            title: Partner ID
+            description: Integration partner identifier issued by Netvisor support.
+            example: Tax_XXXXXX
+            pattern: '^[A-Za-z0-9_-]+$'
+            order: 2
+            doc_section: '#step-1-obtain-partner-credentials-from-netvisor'
+        partnerKey:
+            type: string
+            title: Partner key
+            description: Integration partner secret key issued by Netvisor support.
+            secret: true
+            example: 385DFCAD********************2647432
+            pattern: '^[A-F0-9]{30,40}$'
+            order: 3
+            doc_section: '#step-1-obtain-partner-credentials-from-netvisor'
+        customerId:
+            type: string
+            title: Customer ID
+            description: Per-user API identifier from the Netvisor "API identifiers" screen (the "User ID" column).
+            example: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX_NNNNN
+            pattern: '^[A-F0-9-]{36}_[0-9]+$'
+            order: 4
+            doc_section: '#step-2-generate-an-api-identifier-in-netvisor'
+        organisationId:
+            type: string
+            title: Organisation ID
+            description: Finnish business ID (y-tunnus) of the target Netvisor company.
+            example: 1234567-8
+            pattern: '^\d{7}-\d$'
+            order: 5
+            doc_section: '#step-3-find-your-organisation-id'
+        language:
+            type: string
+            title: Interface language
+            description: Language for Netvisor API responses (FI, SE or EN).
+            example: EN
+            default_value: EN
+            pattern: '^(FI|SE|EN)$'
+            order: 6
+    credentials:
+        apiKey:
+            type: string
+            title: Customer key
+            description: Per-user secret key from the Netvisor "API identifiers" screen (the "Key" column).
+            secret: true
+            example: 1AAA6167********************A11BAD
+            pattern: '^[A-F0-9]{30,40}$'
+            doc_section: '#step-2-generate-an-api-identifier-in-netvisor'
+
 nexthink:
     display_name: Nexthink
     categories:

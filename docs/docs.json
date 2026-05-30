@@ -1420,6 +1420,7 @@
               "integrations/all/netsuite",
               "api-integrations/netsuite-client-credentials",
               "api-integrations/netsuite-tba",
+              "api-integrations/netvisor",
               "integrations/all/next-cloud-ocs",
               "api-integrations/nexthink",
               "api-integrations/nocrm",

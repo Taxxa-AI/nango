@@ -245,6 +245,31 @@ describe('interpolateString', () => {
         expect(output).toBe(`Hash: ${expected}`);
     });
 
+    it('should interpolate ${hmacSha256Hex(message, key)} with hex digest', () => {
+        const input = 'Mac: ${hmacSha256Hex(hello, secret)}';
+        const output = utils.interpolateString(input, {});
+        const expected = crypto.createHmac('sha256', 'secret').update('hello', 'utf8').digest('hex');
+        expect(output).toBe(`Mac: ${expected}`);
+    });
+
+    it('should interpolate ${hmacSha256Hex(message, key)} with replacers inside message and key', () => {
+        const input = 'Mac: ${hmacSha256Hex(${username}, ${password})}';
+        const output = utils.interpolateString(input, replacers);
+        const expected = crypto.createHmac('sha256', 'doe123').update('john', 'utf8').digest('hex');
+        expect(output).toBe(`Mac: ${expected}`);
+    });
+
+    it('should match the Netvisor-published HMACSHA256 reference vector', () => {
+        // Reference vector from https://support.netvisor.fi/en/support/solutions/articles/77000557880-api-authentication
+        // signing string is the 10-field & -joined string; key is customerKey & partnerKey.
+        const signingString =
+            'https://isvapi.netvisor.fi/accounting.nv&ClientName&Integration user identifier&2023-05-04 12:00:00.000&FI&1967543-8&123456&1683147600&7CD680E89E880553358BC07CD28B0EE2&7F94228D149A96B2F25E3EDAD55096E';
+        const key = '7CD680E89E880553358BC07CD28B0EE2&7F94228D149A96B2F25E3EDAD55096E';
+        const input = `\${hmacSha256Hex(${signingString}, ${key})}`;
+        const output = utils.interpolateString(input, {});
+        expect(output).toBe('e920b92df2be6668b283fc03041c6aea09cdb2bf42a72d814131bb811a0e926e');
+    });
+
     it('should interpolate ${random} with replacer when provided', () => {
         const stableRandom = 'fixed-uuid-12345';
         const input = 'Id: ${random}';
@@ -266,6 +291,12 @@ describe('interpolateString', () => {
         const output = utils.interpolateString(input, { now: '2026-03-02T14:30:55.000Z' });
         expect(output).toBe('Date: 2026-03-02');
         vi.useRealTimers();
+    });
+
+    // The X (Unix seconds) token comes from dayjs' advancedFormat plugin; without it the token is emitted literally.
+    it('should interpolate ${now:X} into Unix epoch seconds', () => {
+        const output = utils.interpolateString('Unix: ${now:X}', { now: '2023-05-04T12:00:00.000Z' });
+        expect(output).toBe('Unix: 1683201600');
     });
 });
 

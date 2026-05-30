@@ -752,12 +752,23 @@ export function buildProxyHeaders({
         const parsedUrl = new URL(url);
         const endpointPath = parsedUrl.pathname;
         const endpointQuery = parsedUrl.search.slice(1);
+        // The query as the provider sees it after URL-decoding: reserved characters in a value (e.g. the
+        // comma in `balancedates=2024-01-01,2024-12-31`) are percent-encoded on the wire (-> %2C), but
+        // providers like Netvisor compute their request MAC over the DECODED query string — with literal
+        // commas and spaces as '+' (`dimensionsublabel=Website+renewal`). Rebuild it from the decoded
+        // params, re-encoding only the space, so the signed string matches what the provider expects.
+        const decodedQuery = Array.from(parsedUrl.searchParams.entries())
+            .map(([key, value]) => `${key}=${value.replace(/ /g, '+')}`)
+            .join('&');
         const contentTypeHeader = Object.entries(config.headers ?? {}).find(([k]) => k.toLowerCase() === 'content-type');
         const contentType = contentTypeHeader ? String(contentTypeHeader[1]) : '';
         const baseReplacers = {
             endpoint: config.endpoint,
             host: parsedUrl.host,
             path: endpointPath,
+            // Pathname plus the decoded query string (or just the pathname when there is no query). Required by
+            // providers like Netvisor that compute a request MAC over the full URL including query params.
+            pathWithQuery: endpointQuery ? `${endpointPath}?${decodedQuery}` : endpointPath,
             params: buildCanonicalParams(config.method, config.data, endpointQuery),
             urlCanonicalParams: buildCanonicalParams('GET', undefined, endpointQuery),
             bodyCanonicalParams: getRawBody(config.method, config.data),
